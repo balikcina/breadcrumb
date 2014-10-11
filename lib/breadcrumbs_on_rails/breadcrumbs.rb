@@ -79,16 +79,24 @@ module BreadcrumbsOnRails
     class SimpleBuilder < Builder
 
       def render
-        @elements.collect do |element|
-          render_element(element)
+        @elements.each_with_index.collect do |element, i|
+          if i == @elements.length-1 #last element
+            render_element(element, true)
+          else
+            render_element(element)
+          end
         end.join(@options[:separator] || " &raquo; ")
       end
 
-      def render_element(element)
+      def render_element(element, is_last=false)
         if element.path == nil
           content = compute_name(element)
         else
-          content = @context.link_to_unless_current(compute_name(element), compute_path(element), element.options)
+          if is_last
+            content = compute_name(element)
+          else
+            content = @context.link_to(compute_name(element), compute_path(element), element.options)
+          end
         end
         if @options[:tag]
           @context.content_tag(@options[:tag], content)
